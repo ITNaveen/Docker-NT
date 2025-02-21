@@ -3,13 +3,17 @@ cat ~/.docker/config.json
 
 To see all connected registries - 
 docker-credential-desktop list | jq '.'
+docker info | grep Username
+
 jq is json beautifier and after pipe it means, take all json file and format it.
+To check which account are saved.
+If you're not sure which Docker account you're logged into, this command confirms it.
 
 --------------------------------------------------
 DOCKER_FILES - 
 
 ENV var - Environment Variables (ENV vars) in Docker are like configuration settings that you set with default values in your Dockerfile, but can change when running the container. They make your Docker images flexible and reusable across different environments.
-
+I need to define this a the start of the dockerfile, so i can change them if needed for like dev, test etc and rest file remain same.
 dockerfile
 # Default production settings
 ENV PORT=80
@@ -70,26 +74,32 @@ ENV FEATURE_NEW_UI=false         # Toggle new features
 ENV REDIS_HOST=redis.server      # Cache service
 ENV ELASTIC_URL=http://elastic   # Search service
 
+......................................
 USING SENSITIVE INFO - 
+
 # Dockerfile
-ENV DB_PASSWORD=""
-ENV API_KEY=""
+- for sensitive info i will leave these 2 in dockerfile like this - 
+  ENV DB_PASSWORD=""
+  ENV API_KEY=""
 
-.env file in same DIR
-echo "DB_PASSWORD=secret123" > .env
-echo "API_KEY=abc123" >> .env
+docker build -t myapp .   (to build image but without sensitive info)
 
-docker run --env-file .env myapp
+- then i will create passowrd.env file 
+  DB_PASSWORD=secret123
+  API_KEY=abc123
+
+docker run --env-file path/to/password.env myapp (this way i am injecting sensitive values now.) start container first time.
+.....................................
 
 LOG-LEVEL - 
 ENV LOG_LEVEL=error   # Most restrictive by default (in docker file)
 
-# To see more details
-docker run -e LOG_LEVEL=debug myapp
+# To see more details 
+docker run -e LOG_LEVEL=debug myapp (this set env var temp)
 
 # To see only important info
 docker run -e LOG_LEVEL=info myapp
 
 # To see minimal logs (errors only)
-docker run -e LOG_LEVEL=error myapp
+docker run -e LOG_LEVEL=error myapp > myapp.log
 
