@@ -1,4 +1,4 @@
-To check which process is running on port 80 --- sudo lsof -i :80
+To check which process is running on port 80 --- sudo lsof -i :80   ()
 To remove all the stopped container --- docker container prune
 
 All running process - top 
@@ -12,7 +12,7 @@ External Request → Host:9000
               Docker NAT Rules
                      ↓
               Container:80
-NAT is confifured on docker engine that is running on host.
+NAT is configured on docker engine that is running on host.
 
 Key points you've correctly identified:
 
@@ -21,6 +21,12 @@ Acts as a virtual network switch/interface
 Manages inter-container communication
 Handles NAT rules for port mappings (-p)
 Serves as the gateway for container networking
+
+............................
+# check my ip - 
+ifconfig = local/private IP  (en0)
+curl ifconfig.me = public ip 
+............................
 
 We have normally 1 docker0 NI but ideally we should have network for each APPLICATION,S RESOURCES sepertely. we can do that like this - 
 docker network create app1-network
