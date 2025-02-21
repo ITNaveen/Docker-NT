@@ -1,0 +1,17 @@
+container accept instrctions then process then and forward to PV (db vol) then CRUD happen in the volume, processing happen in container but CRUD in vol.
+thats how our DB is updated all the time.
+
+Now i have created my sql db container - docker run -d --name mysql_n -e MYSQL_RANDOM_ROOT_PASSWORD=True  mysql
+
+each container here will create a volume and we can check the vol ID with docker inspect conID but from volume stand point, we cant see where
+this vol is attach - first name the vol - 
+docker run -d --name mysql_n3 -e MYSQL_RANDOM_ROOT_PASSWORD=True -v my_mysql_1:/var/lib/mysql  mysql 
+
+/////////////////////////////////////////////////////////////////
+BIND MOUNT - 
+its a mapping of host file dir into container dir.
+docker run -d --name mginx_1 -p 80:80 -v $(pwd)://usr/share/nginx/html nginx
+here is the same dir i have index.html so any update in this file will reflect on the container.
+
+UPDATE - 
+docker run -d --name postgre_old -p 5432:5432 --platform linux/amd64 -e POSTGRES_HOST_AUTH_METHOD=trust -v psql-data:/var/lib/postgresql/data postgres:9.6.1

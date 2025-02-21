@@ -1,0 +1,56 @@
+# Step 1: Use the official Python image as the base image for building
+FROM python:3.9-slim AS build
+
+# Step 2: Set the working directory
+WORKDIR /app
+
+# Step 3: Copy the requirements.txt to install dependencies
+COPY requirements.txt .
+
+# Step 4: Install dependencies
+RUN pip install --no-cache-dir -r requirements.txt
+.......--no-cache-dir option ensures that no cache is stored during installation, which helps keep the image smaller........
+......  -r means this is requirements.txt file ..........
+
+# Step 5: Copy the rest of the application code
+COPY . .
+
+# Step 6: Collect static files for production (this is typically needed for Django apps)
+RUN python manage.py collectstatic --noinput
+... it means collect all static files and bundle them and keep it to the dir defined in settings.py......
+....normally under STATIC_URL = ..................
+......--noinput, supress any input that might be asked during execution of this command........
+
+# Step 7: Use the official Python image for the runtime environment (without build dependencies)
+FROM python:3.9-slim AS runtime
+
+# Step 8: Set the working directory for the runtime container
+WORKDIR /app
+
+# Step 9: Copy the installed dependencies from the build stage
+COPY --from=build /app /app
+
+# Step 10: Set environment variables (like Django settings for production)
+ENV DJANGO_SETTINGS_MODULE=myproject.settings.production
+.....settings.prod has app logic and config like db setting, security setting, caching, logging info etc ........
+
+# Step 11: Expose the port the app will use (by default Django runs on port 8000)
+EXPOSE 8000
+
+# Step 12: Define the command to run the Django app when the container starts
+CMD ["gunicorn", "myproject.wsgi:application", "--bind", "0.0.0.0:8000"]
+/////////////////////////////////////////////////////////////////////////
+myproject/                    # This is the main project directory
+│
+├── requirements.txt           # List of project dependencies
+├── Dockerfile                 # Optional, for containerization
+├── manage.py                 # Django command-line utility
+│
+└── myproject/                 # This is the subfolder with the same name as your project
+    ├── __init__.py            # Marks the folder as a Python package
+    ├── settings.py            # Main settings file (or settings folder for different environments)
+    ├── wsgi.py                # WSGI file that defines the `application` callable
+    ├── asgi.py                # ASGI file (for asynchronous web servers)
+    ├── urls.py                # URL routing for your project
+    └── other_project_files/   # Your Django app logic (like models, views, etc.)
+//////////////////////////////////////////////////////////////////////////////////

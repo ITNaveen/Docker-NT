@@ -1,0 +1,70 @@
+Step 1: Use the official .NET SDK image as the base image for building
+FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
+
+# Step 2: Set the working directory
+WORKDIR /app
+
+# Step 3: Copy the project file and restore dependencies
+COPY ["ElectronicsMicroservice/ElectronicsMicroservice.csproj", "./"]
+RUN dotnet restore "ElectronicsMicroservice.csproj"
+
+# Step 4: Copy the rest of the application code
+COPY . .
+
+# Step 5: Build the application
+RUN dotnet build "ElectronicsMicroservice.csproj" -c Release -o /app/build
+.....code compiled using .cs folder....
+# Step 6: Publish the application
+RUN dotnet publish "ElectronicsMicroservice.csproj" -c Release -o /app/publish
+....... - c Release means build at prod level and save artifact in publish .........
+
+# Step 7: Set the base image for runtime (this contains only the runtime, not SDK)   ////runtime stage
+FROM mcr.microsoft.com/dotnet/aspnet:6.0
+
+# Step 8: Set the working directory for the runtime image
+WORKDIR /app
+
+# Step 9: Copy the published app files from the build stage
+COPY --from=build /app/publish .
+.......... from build stage copy publish file and paste in current dir.............
+
+# Step 10: Set environment variables (for example: environment and database connection string)
+ENV ASPNETCORE_ENVIRONMENT=Production
+ENV CONNECTION_STRING="your-connection-string-here"
+
+# Step 11: Expose the port the app will use
+EXPOSE 80
+
+# Step 12: Define the command to run the application when the container starts
+CMD ["dotnet", "ElectronicsMicroservice.dll"]
+
+
+.csproj - how project should be build, including dependencies, how app should be packaged.
+.cs - its a source code and its used in buid process.
+.dll - when .cs + .csproj in build stage then i get arifact in publish with .dll extension.
+
+/////////////////////////
+This is ASP.NET Core app
+/////////////////////////
+
+
+[[[[[[[[[[[[[[[[[[[[[[[[]]]]]]]]]]]]]]]]]]]]]]]]
+Why copy only .csproj first?
+The .csproj file contains the project structure and dependencies for your .NET application. When you run dotnet restore, it reads the .csproj file and downloads all the required NuGet packages (dependencies) specified in that file. These dependencies are stored in the NuGet cache within the Docker image.
+Benefit: By copying only the .csproj file and running dotnet restore, you allow Docker to cache this layer effectively. If only the source code changes (not the project file or dependencies), Docker will reuse the dotnet restore layer from the cache, avoiding re-downloading the dependencies.
+[[[[[[[[[[[[[[[[[[[[[[[[[[[[]]]]]]]]]]]]]]]]]]]]]]]]]]]]
+
+
+''''''''''''''''''''''''''''''''''''''
+Why Can't You Just Copy the Remaining Files After dotnet restore?
+The key reason is that the .csproj file and all source files are tightly connected during the build process. Here's a deeper explanation:
+
+The .csproj File and Its Role in the Build Process
+The .csproj file not only lists the dependencies (like NuGet packages) but also includes information about the files and resources that are part of your project. This means it defines how the project is built, what files to include, and how those files are referenced.
+
+When you dotnet restore, it doesn't just download dependencies—it also prepares the build environment by resolving references to your source code and resources as defined in the .csproj file.
+
+Build Dependencies and Source Files
+When you run dotnet build or dotnet publish, the build process is looking for all the source files that are part of the project (i.e., the .cs files, configuration files, etc.) as well as the dependencies (which were restored earlier).
+
+If you don’t copy all the files after restoring dependencies, Docker won’t have access to the actual code files during the build process. The reason for this is that dotnet build or dotnet publish needs to reference the source code that exists in the project directory in order to compile everything.

@@ -1,0 +1,95 @@
+This is where docker write credentials details - 
+cat ~/.docker/config.json
+
+To see all connected registries - 
+docker-credential-desktop list | jq '.'
+jq is json beautifier and after pipe it means, take all json file and format it.
+
+--------------------------------------------------
+DOCKER_FILES - 
+
+ENV var - Environment Variables (ENV vars) in Docker are like configuration settings that you set with default values in your Dockerfile, but can change when running the container. They make your Docker images flexible and reusable across different environments.
+
+dockerfile
+# Default production settings
+ENV PORT=80
+ENV DB_URL=mongodb://prod
+ENV LOG_LEVEL=error
+
+# Production - uses defaults
+docker run myapp
+
+# Testing - override defaults
+docker run -e PORT=4000 \
+          -e DB_URL=mongodb://test \
+          -e LOG_LEVEL=debug \
+          myapp
+
+# Development - different overrides
+docker run -e PORT=3000 \
+          -e DB_URL=mongodb://localhost \
+          -e LOG_LEVEL=debug \
+          myapp
+
+
+2. Configuration Flexibility
+No need for multiple configurations:
+# Instead of different files for each environment:
+# Dockerfile.dev
+# Dockerfile.test
+# Dockerfile.prod
+
+# One Dockerfile with defaults
+ENV PORT=80
+ENV DB_URL=mongodb://default
+ENV LOG_LEVEL=error
+
+# Change at runtime as needed
+docker run -e PORT=3000 -e DB_URL=mongodb://new-db myapp
+
+3. Common Use Cases with Examples
+# Port configuration
+ENV PORT=80                        # Which port to listen on
+
+# Database configuration
+ENV DB_URL=mongodb://db           # Database connection string
+ENV DB_NAME=myapp                 # Database name
+
+# API configuration
+ENV API_URL=http://api.com        # External API endpoint
+ENV API_VERSION=v1                # API version
+
+# Application behavior
+ENV LOG_LEVEL=error              # Logging configuration
+ENV DEBUG=false                  # Debug mode flag
+
+# Feature flags
+ENV FEATURE_NEW_UI=false         # Toggle new features
+
+# Service connections
+ENV REDIS_HOST=redis.server      # Cache service
+ENV ELASTIC_URL=http://elastic   # Search service
+
+USING SENSITIVE INFO - 
+# Dockerfile
+ENV DB_PASSWORD=""
+ENV API_KEY=""
+
+.env file in same DIR
+echo "DB_PASSWORD=secret123" > .env
+echo "API_KEY=abc123" >> .env
+
+docker run --env-file .env myapp
+
+LOG-LEVEL - 
+ENV LOG_LEVEL=error   # Most restrictive by default (in docker file)
+
+# To see more details
+docker run -e LOG_LEVEL=debug myapp
+
+# To see only important info
+docker run -e LOG_LEVEL=info myapp
+
+# To see minimal logs (errors only)
+docker run -e LOG_LEVEL=error myapp
+

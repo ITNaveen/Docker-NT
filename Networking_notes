@@ -1,0 +1,46 @@
+To check which process is running on port 80 --- sudo lsof -i :80
+To remove all the stopped container --- docker container prune
+
+All running process - top 
+All running processes in container - docker top conatinerID
+docker inspect gives detailed container information in JSON format.
+docker stats is container metrics in streaming way.
+
+By default each container connected to each other with BRIDGE network.
+External Request → Host:9000 
+                     ↓
+              Docker NAT Rules
+                     ↓
+              Container:80
+NAT is confifured on docker engine that is running on host.
+
+Key points you've correctly identified:
+
+docker0 is created at Docker Engine startup
+Acts as a virtual network switch/interface
+Manages inter-container communication
+Handles NAT rules for port mappings (-p)
+Serves as the gateway for container networking
+
+We have normally 1 docker0 NI but ideally we should have network for each APPLICATION,S RESOURCES sepertely. we can do that like this - 
+docker network create app1-network
+docker run --network app1-network --name app1-web nginx
+we can check the port of container - docker container port contaner_name
+check IP of container - docker container inspect --format '{{ .NetworkSettings.IPAddress }}' webhost
+
+we can connect or disconnect a live running container from specific network - 
+docker network connect network_name container_name
+
+
+we can list all docker network - docker network ls 
+we can have container using host network rather than docker network using  --- --network host 
+check my host ip - ifconfig en0
+
+we can see which container is associated with which network -
+docker inspect network_name
+
+
+--------------------------------
+DNS - 
+--net-alias alias_name , when we launch containers in this way then essentially its like lb for those 2 containers and when we hit this alias name, then it will resolve in either of those containers.
+

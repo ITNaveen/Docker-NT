@@ -1,0 +1,74 @@
+version: '3.8'
+
+services:
+  # Django Backend
+  backend:
+    build:
+      context: ./  # This should be the root of your project directory
+      dockerfile: Dockerfile  # Specify the Dockerfile if you have one
+    container_name: django-backend
+    command: ["python3", "manage.py", "runserver", "0.0.0.0:8000"]
+    volumes:
+      - ./myproject:/app  # Mount the Django app directory into the container
+      - ./requirements.txt:/app/requirements.txt  # Mount requirements.txt (for installation)
+    ports:
+      - "8000:8000"
+    environment:
+      - DB_HOST=postgres
+      - DB_NAME=your_db_name
+      - DB_USER=your_db_user
+      - REDIS_HOST=redis
+    secrets:
+      - postgres_password  # Referencing the secret for PostgreSQL password
+      - redis_password     # Referencing the secret for Redis password
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - app-network
+
+  # React Frontend
+  frontend:
+    build:
+      context: ./frontend  # Path to your React project
+    container_name: react-frontend
+    ports:
+      - "3000:80"
+    networks:
+      - app-network
+
+  # PostgreSQL Database
+  postgres:
+    image: postgres:13
+    container_name: postgres-db
+    environment:
+      POSTGRES_DB: your_db_name
+      POSTGRES_USER: your_db_user
+    secrets:
+      - postgres_password  # PostgreSQL password stored as a secret
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - app-network
+
+  # Redis Cache
+  redis:
+    image: redis:latest
+    container_name: redis-cache
+    secrets:
+      - redis_password     # Redis password stored as a secret
+    networks:
+      - app-network
+
+volumes:
+  postgres-data:
+
+networks:
+  app-network:
+    driver: bridge
+
+secrets:
+  postgres_password:
+    external: true  # Marks this as an external secret
+  redis_password:
+    external: true  # Marks this as an external secret

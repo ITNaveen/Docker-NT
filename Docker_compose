@@ -1,0 +1,58 @@
+this way we can configure many ontainers at once, it has 2 major part.
+first is YAML - containers
+                volumes
+                network
+                secrets & config
+second if cli tool -
+                docker-compose (mainly used for dev and test)
+
+/////////////////////////////////////////////
+version: '3.9'
+
+services:
+  web:
+    image: nginx:latest
+    ports:
+      - "80:80"
+    volumes:
+      - web-data:/usr/share/nginx/html
+    environment:
+      - ENV=production
+
+  app:
+    image: my-app:latest
+    build:
+      context: ./app
+      dockerfile: Dockerfile
+    command: npm start
+    ports:
+      - "3000:3000"
+    environment:
+      - DATABASE_URL=mysql://db_user:db_pass@db:3306/app_db
+    depends_on:
+      - db
+
+  db:
+    image: mysql:5.7
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpass
+      MYSQL_DATABASE: app_db
+      MYSQL_USER: db_user
+      MYSQL_PASSWORD: db_pass
+    volumes:
+      - db-data:/var/lib/mysql
+
+volumes:
+  web-data:
+  db-data:
+
+so one way is to use default image and another is use build for that specific service then set a context and then use custom docker file then name the 
+image (check compose-section-3)
+///////////////////////////////////////////////////
+
+Contains of docker compose file - 
+it has version and since 2017 with DOCKER SWARM, it can be used in PROD.
+To start container and setting up vol - docker compose up
+to stop - docker compose down
+
+

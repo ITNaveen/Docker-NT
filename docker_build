@@ -1,0 +1,49 @@
+docker build -t temp-image . && docker run --name frontend temp-image
+(it picks dockerfile from current dir)
+
+docker tag image_name new_tag_you_want
+
+when i have many docker file in same dir then i use -f to spcificy which dockerfile i want to use.
+
+\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+docker system df  
+Shows:
+
+Images: Docker images stored locally (like installed apps)
+
+Total number of images
+How many are actively used
+Total disk space they occupy
+How much space you could free up
+
+
+Containers: Running or stopped containers
+
+How many containers exist
+How many are currently active
+Extra space they use beyond their image size
+Space that could be freed by removing stopped containers
+
+
+Volumes: Persistent data storage
+
+Number of volumes
+How many are connected to containers
+Space used by volume data
+Space from unused volumes you could reclaim
+
+
+Build Cache: Temporary files from building images
+
+Cache entries from building images
+Space used by build cache
+How much cache space you could clean up
+
+
+
+It's particularly useful when you need to:
+
+Check how much disk space Docker is using
+Find out if you need to clean up old resources
+Identify what can be safely removed
+Manage Docker disk usage efficiently
