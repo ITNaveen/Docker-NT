@@ -1,5 +1,5 @@
 this way we can configure many ontainers at once, it has 2 major part.
-first is YAML - containers
+first is YAML - containers                   ---- or we can say "CPVNS"
                 volumes
                 network
                 secrets & config
@@ -20,31 +20,37 @@ services:
       - ENV=production
 
   app:
-    image: my-app:latest
+    image: my-app:latest  # Name and tag for the built image
     build:
-      context: ./app
-      dockerfile: Dockerfile
-    command: npm start
+      context: ./app  # Directory containing the Dockerfile
+      dockerfile: Dockerfile  # Specify the Dockerfile to use
+    command: npm start  # Command to start the application inside the container
     ports:
       - "3000:3000"
     environment:
-      - DATABASE_URL=mysql://db_user:db_pass@db:3306/app_db
+      - DATABASE_URL=${DATABASE_URL}  # Load from .env file
     depends_on:
-      - db
+      - db  # Ensure the 'db' service starts before this service
 
   db:
     image: mysql:5.7
-    environment:
-      MYSQL_ROOT_PASSWORD: rootpass
-      MYSQL_DATABASE: app_db
-      MYSQL_USER: db_user
-      MYSQL_PASSWORD: db_pass
+    env_file:  
+      - db.env  # Load environment variables from db.env  
     volumes:
       - db-data:/var/lib/mysql
 
 volumes:
   web-data:
   db-data:
+
+# db.env file to be kept in the same dir - 
+MYSQL_ROOT_PASSWORD=rootpass
+MYSQL_DATABASE=app_db
+MYSQL_USER=db_user
+MYSQL_PASSWORD=db_pass
+DATABASE_URL=mysql://db_user:db_pass@db:3306/app_db
+
+
 
 so one way is to use default image and another is use build for that specific service then set a context and then use custom docker file then name the 
 image (check compose-section-3)

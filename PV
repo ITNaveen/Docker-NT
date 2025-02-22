@@ -11,6 +11,8 @@ docker run -d --name mysql_n --env-file password.env mysql
 each container here will create a volume and we can check the vol ID with docker inspect conID but from volume stand point, we cant see where
 this vol is attach - first name the vol - 
 docker run -d --name mysql_n3 -e MYSQL_RANDOM_ROOT_PASSWORD=True -v my_mysql_1:/var/lib/mysql  mysql 
+- so i have mounted a vol with mysql container. volume name "my_mysql_1"
+- this volume stays in - "/var/lib/docker/volumes/my_mysql_1/_data", in mac and linux.
 
 /////////////////////////////////////////////////////////////////
 BIND MOUNT - 

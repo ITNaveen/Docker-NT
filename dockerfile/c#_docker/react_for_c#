@@ -28,3 +28,8 @@ EXPOSE 80
 # Step 10: Command to start NGINX
 CMD ["nginx", "-g", "daemon off;"]
 ..........this way this command "nginx" will run on foreground with daemon off............
+
+Final Answer
+Before build: Logic is in src/ (React components).
+After build: Logic is in build/static/js/ (minified & optimized).
+Your Docker image only contains the build/ folder, so no source code exists inside it!
